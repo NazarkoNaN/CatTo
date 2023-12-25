@@ -1,5 +1,6 @@
 import json
 from rest_framework import generics
+from rest_framework.decorators import api_view
 from rest_framework import exceptions
 from rest_framework.views import Response
 from rest_framework import permissions
@@ -7,6 +8,12 @@ from django.contrib.auth.models import User
 from .serializers import MessageSerializer, ChatSerializer
 from .models import Message, Chat
 from .permissions import IsSenderOrRceiverToReadOnly, IsMember
+
+
+class ChatDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes=[IsMember, permissions.IsAuthenticated]
+    queryset=Chat.objects.all()
+    serializer_class=ChatSerializer
 
 
 class ChatList(generics.ListAPIView):

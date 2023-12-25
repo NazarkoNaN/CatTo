@@ -6,10 +6,20 @@ from .models import Message, Chat
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
-        fields = ['sender','chat','text','created','updated']
+        fields = ['id','sender','chat','text','created','updated']
+
+
+class Receivers(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username']
 
 
 class ChatSerializer(serializers.ModelSerializer):
+    receivers = Receivers(many=True)
+
     class Meta:
         model = Chat
-        fields = ['name', 'receivers']
+        fields = ['id','name', 'receivers']
+
+
