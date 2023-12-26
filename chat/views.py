@@ -1,12 +1,7 @@
-import json
 from rest_framework.views import APIView
 from rest_framework import generics
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework import exceptions
 from rest_framework.views import Response
 from rest_framework import permissions
-from rest_framework.exceptions import PermissionDenied
-from django.contrib.auth.models import User
 from .serializers import MessageSerializer, ChatSerializer, ChatMessagesSerializer
 from .models import Message, Chat
 from .permissions import IsSenderOrRceiverToReadOnly, IsMember
@@ -38,32 +33,33 @@ class ChatMessageList(APIView):
             serializer.save()
         return Response({"message": "Message was sented"})
 
-
 class ChatDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes=[IsMember, permissions.IsAuthenticated]
-    queryset=Chat.objects.all()
-    serializer_class=ChatSerializer
-
+    permission_classes = [permissions.IsAuthenticated & IsMember | permissions.IsAdminUser]
+    queryset = Chat.objects.all()
+    serializer_class = ChatSerializer
 
 class ChatList(generics.ListAPIView):
-    permission_classes=[permissions.IsAdminUser]
+    permission_classes = [permissions.IsAdminUser]
     queryset = Chat.objects.all()
-    serializer_class=ChatSerializer
+    serializer_class = ChatSerializer
+
+class ChatCreate(generics.CreateAPIView):
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Chat.objects.all()
+    serializer_class = ChatSerializer
 
 
 class MessageList(generics.ListAPIView):
-    permission_classes=[permissions.IsAdminUser]
-    queryset=Message.objects.all()
+    permission_classes = [permissions.IsAdminUser]
+    queryset = Message.objects.all()
     serializer_class=MessageSerializer
-
 
 class MessageDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes=[permissions.IsAdminUser]
-    queryset=Message.objects.all()
-    serializer_class=MessageSerializer
-
+    permission_classes = [permissions.IsAdminUser]
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
 
 class MessageCreate(generics.CreateAPIView):
-    permission_classes=[permissions.IsAdminUser]
-    queryset=Message.objects.all()
-    serializer_class=MessageSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
