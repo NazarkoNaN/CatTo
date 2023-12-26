@@ -12,7 +12,10 @@ class IsSenderOrRceiverToReadOnly(permissions.BasePermission):
         return obj.sender == request.user
 
 
+# Permission is not working
+
 class IsMember(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS and request.user in obj.receivers.all():
             return True
+        return False
