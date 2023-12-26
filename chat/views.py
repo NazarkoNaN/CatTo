@@ -1,38 +1,42 @@
 import json
+from rest_framework.views import APIView
 from rest_framework import generics
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import exceptions
 from rest_framework.views import Response
 from rest_framework import permissions
+from rest_framework.exceptions import PermissionDenied
 from django.contrib.auth.models import User
 from .serializers import MessageSerializer, ChatSerializer, ChatMessagesSerializer
 from .models import Message, Chat
 from .permissions import IsSenderOrRceiverToReadOnly, IsMember
 
 
-@api_view(['GET', 'POST'])
-@permission_classes({permissions.IsAuthenticated})
-def chat_messages_list(request, pk):
-    # POST method
-    if request.method == 'POST':
+class ChatMessageList(APIView):
+    permission_classes = [permissions.IsAuthenticated & IsMember | permissions.IsAdminUser]
+    
+    def get(self, request, pk, format=None):
+        chat = Chat.objects.get(pk=pk)
+
+        self.check_object_permissions(request, chat)
+
+        serializer = ChatMessagesSerializer(instance=chat)
+        return Response(serializer.data)
+    
+    def post(self, request, pk, format=None):
+        chat = Chat.objects.get(pk=pk)
+        
+        self.check_object_permissions(request, chat)
+
         data = {
             'sender' : request.user,
-            'chat' : Chat.objects.get(pk=pk),
+            'chat' : chat,
             'text' : request.data.get('text')      
         }
         serializer = ChatMessagesSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-        return Response()
-    '''
-    {"text": "Hello, it is me, Billy"}
-    '''
-
-    # GET method
-    instance = Chat.objects.get(pk=pk)
-    serializer = ChatMessagesSerializer(instance)
-    return Response(serializer.data)
-
+        return Response({"message": "Message was sented"})
 
 
 class ChatDetail(generics.RetrieveUpdateDestroyAPIView):
