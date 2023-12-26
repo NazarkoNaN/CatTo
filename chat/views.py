@@ -1,7 +1,6 @@
-from rest_framework.views import APIView
 from rest_framework import generics
-from rest_framework.views import Response
 from rest_framework import permissions
+from rest_framework.views import Response, APIView
 from .serializers import MessageSerializer, ChatSerializer, ChatMessagesSerializer
 from .models import Message, Chat
 from .permissions import IsSenderOrRceiverToReadOnly, IsMember
@@ -55,7 +54,7 @@ class MessageList(generics.ListAPIView):
     serializer_class=MessageSerializer
 
 class MessageDetail(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [IsSenderOrRceiverToReadOnly | permissions.IsAdminUser]
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 
