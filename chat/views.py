@@ -10,8 +10,25 @@ from .models import Message, Chat
 from .permissions import IsSenderOrRceiverToReadOnly, IsMember
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
+@permission_classes({permissions.IsAuthenticated})
 def chat_messages_list(request, pk):
+    # POST method
+    if request.method == 'POST':
+        data = {
+            'sender' : request.user,
+            'chat' : Chat.objects.get(pk=pk),
+            'text' : request.data.get('text')      
+        }
+        serializer = ChatMessagesSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+        return Response()
+    '''
+    {"text": "Hello, it is me, Billy"}
+    '''
+
+    # GET method
     instance = Chat.objects.get(pk=pk)
     serializer = ChatMessagesSerializer(instance)
     return Response(serializer.data)

@@ -35,4 +35,31 @@ class ChatMessagesSerializer(serializers.BaseSerializer):
             'receivers' : receivers_serializer.data,
             'messages' : messages_serializer.data
         }
+    
+    def to_internal_value(self, data):
+        sender = data.get('sender')
+        chat = data.get('chat')
+        text = data.get('text')
 
+
+        if not sender:
+            return serializers.ValidationError({
+                'sender': 'This field is required'
+            })
+        if not chat:
+            return serializers.ValidationError({
+                'chat': 'This field is required'
+            })
+        if not text:
+            return serializers.ValidationError({
+                'text': 'This field is required'
+            })
+        
+        return {
+            'sender':sender,
+            'chat':chat,
+            'text':text
+        }
+
+    def create(self, validated_data):
+        return Message.objects.create(**validated_data)
